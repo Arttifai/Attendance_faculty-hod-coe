@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* Custom Styles */
+        .selected {
+            background-color: #3fbc0e !important;
+            color: #dc3545;
+        }
+        .modal-header {
+            background-color: #0d6efd;
+            color: #fff;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .card-title {
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        .form-select, .form-control {
+            border-radius: 8px;
+        }
+        .btn {
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+        }
+        .list-group-item {
+            transition: background-color 0.3s ease;
+        }
+        .list-group-item:hover {
+            background-color: #e2e3e5;
+        }
+        /* Animation */
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        .fade-out {
+            animation: fadeOut 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+        .input-error {
+            border: 2px solid #dc3545;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Attendance</h1>
+        <a href="{% url 'logout' %}">Logout</a>
+ 
+        <div class="row">
+            <!-- Submitted Details -->
+            <div class="col-lg-6 mb-4 fade-in" id="submitted-section" style="display:none;">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Submitted Details</h5>
+                        <div id="submitted-details">
+                            <p><strong>Date:</strong> <span id="submitted-date">-</span></p>
+                            <p><strong>Department:</strong> <span id="submitted-department">-</span></p>
+                            <p><strong>Year:</strong> <span id="submitted-year">-</span></p>
+                            <p><strong>Section:</strong> <span id="submitted-section-value">-</span></p>
+                            <p><strong>Subject:</strong> <span id="submitted-subject">-</span></p>
+                            <p><strong>Hour:</strong> <span id="submitted-hour">-</span></p>
+                            <p><strong>Mode of Teaching:</strong> <span id="submitted-mode">-</span></p>
+                            <p><strong>Day Order:</strong> <span id="submitted-day_order">-</span></p>
+
+                            <button class="btn btn-warning w-100" id="edit-btn">Edit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Section -->
+            <div class="col-lg-6 mb-4 fade-in" id="form-section">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Filter Details</h5>
+                        <form id="filter-form" method="get" action="{% url 'loginstaff' %}"  >
+                            {% csrf_token %}
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="date" class="form-label">Date</label>
+                                    <input type="date" id="date" name="date" class="form-control">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="department" class="form-label">Department</label>
+                                    <select id="department" name="department" class="form-select" onchange="storeDepartment()">
+                                        <option value="">Select Department</option>
+                                        {% if hand_dept %}
+                                            {% for dept in hand_dept %}
+                                            <option value="{{dept}}">{{dept}}</option>
+                                            {% endfor %}
+                                        {% else %}
+                                            <option value="" disabled>No departments available</option>
+                                        {% endif %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="year" class="form-label">Year</label>
+                                    <select id="year" name="year" class="form-select">
+                                        <option value="">Select Year</option>
+                                        <option value="1">1st</option>
+                                        <option value="2">2nd</option>
+                                        <option value="3">3rd</option>
+                                        <option value="4">4th</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="section" class="form-label">Section</label>
+                                    <select id="section" name="section" class="form-select">
+                                        <option value="">Select Section</option>
+                                        <option value="A">A</option>
+                                        <option value="B">B</option>
+                                        <option value="C">C</option>
+                                        <option value="NO">NO SECTION</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <!-- Subject Selection -->
+                                    <label for="subject" class="form-label">Subject</label>
+                                    <select id="subject" name="subject" class="form-select">
+                                        <option value="">-- Select Department & Year first --</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="hour" class="form-label">Hour</label>
+                                    <select id="hour" name="hour" class="form-select">
+                                        <option value="">Select Hour</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                        <option value="7">7</option>
+                                        <option value="8">Additional Hour</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="mode_handle" class="form-label">Mode of Teaching</label>
+                                    <select id="mode_handle" name="mode_handle" class="form-select">
+                                        <option value="">Select Mode</option>
+                                        <option value="Theory">Theory</option>
+                                        <option value="Practical">Practical</option>
+                                        <option value="Others">Others</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="day_order" class="form-label">Day Order</label>
+                                    <select id="day_order" name="day_order" class="form-select">
+                                        <option value="">Select day Order</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+
+
+        <!-- Results Section -->
+        <div class="col-lg-6 mb-4 fade-in">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Results</h5>
+                        <!--<ul id="selected-students-list" class="list-group">-->
+                        <!-- You can optionally remove this part if you are dynamically loading the data -->
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Register Number</th>
+                                        <th>Student Name</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="results-body">
+                                    <!-- Dynamically loaded student data will go here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+            <!-- Selected Students Preview -->
+            <div class="row mt-4 fade-in" id="preview-section">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Selected Students Preview</h5>
+                        <div id="selected-students-preview">
+                            <ul id="selected-students-list" class="list-group">
+                                <!-- Dynamically added selected students will appear here -->
+                            </ul>
+                            <!-- Submit button for selected students -->
+                            <button type="submit" id="submit-selected-students" class="btn btn-success w-100 mt-3">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            $(document).ready(function() {
+                function fetchSubjects() {
+                    var department = $("#department").val();
+                    var year = $("#year").val();
+
+                    if (department && year) {
+                        $("#subject").html('<option value="">-- Loading... --</option>');
+
+                        $.ajax({
+                            url: "{% url 'get_subjects' %}",
+                            data: { department: department, year: year },
+                            success: function(data) {
+                                var options = '<option value="">-- Select --</option>';
+                                data.forEach(function(sub) {
+                                    options += `<option value="${sub}">${sub}</option>`;
+                                });
+                                $("#subject").html(options);
+                            }
+                        });
+                    } else {
+                        $("#subject").html('<option value="">-- Select Department & Year first --</option>');
+                    }
+                }
+
+                // Trigger subject fetch when department or year changes
+                $("#department, #year").change(fetchSubjects);
+            });
+            // Handle form submission
+            $('#filter-form').on('submit', function (e) {
+                e.preventDefault(); // Prevent default form submission
+        
+                // Validate the form
+                var valid = true;
+                $('#filter-form').find('select, input').each(function () {
+                    if (!this.checkValidity()) {
+                        $(this).addClass('input-error');
+                        valid = false;
+                    } else {
+                        $(this).removeClass('input-error');
+                    }
+                });
+        
+                if (!valid) {
+                    alert('Please fill in all the fields correctly.');
+                    return;
+                }
+        
+                // Collect form data
+                var formData = {
+                    date: $('#date').val(),
+                    department: $('#department').val(),
+                    year: $('#year').val(),
+                    section: $('#section').val(),
+                    subject: $('#subject').val(),
+                    hour: $('#hour').val(),
+                    mode_handle: $('#mode_handle').val(),
+                    day_order: $('#day_order').val(),
+                };
+        
+                // Send the data to the server using AJAX
+                $.ajax({
+                    url: '/login/staff/', // Replace with your Django view URL
+                    type: 'POST', // POST is better for data submission
+                    data: JSON.stringify(formData),
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}' }, // Add CSRF token for security
+                    success: function (response) {
+                        // Handle server response
+                        console.log(response);
+        
+                        // Update the submitted details section dynamically
+                        $('#submitted-date').text(formData.date);
+                        $('#submitted-department').text(formData.department);
+                        $('#submitted-year').text(formData.year);
+                        $('#submitted-section-value').text(formData.section);
+                        $('#submitted-subject').text(formData.subject);
+                        $('#submitted-hour').text(formData.hour);
+                        $('#submitted-mode').text(formData.mode_handle);
+                        $('#submitted-day_order').text(formData.day_order);
+        
+                        $('#form-section').hide();
+                        $('#submitted-section').show();
+        
+                        // Update results section dynamically
+                        // Assuming you get the response correctly from the backend
+                            if (response.students_data) {
+                                let tableBody = $('#results-body');
+                                tableBody.empty();  // Clear the existing rows in the table
+
+                                // Check if we have students data to display
+                                if (response.students_data.length > 0) {
+                                    // Loop through each student and append to the table
+                                    response.students_data.forEach(student => {
+                                        tableBody.append(
+                                            `<tr data-id="${student.REG_NO}" data-name="${student.stud_name}">
+                                                <td>${student.REG_NO}</td>
+                                                <td>${student.stud_name}</td>
+                                            </tr>`
+                                        );
+                                    });
+                                } else {
+                                    // If no students, show a message
+                                    tableBody.append('<tr><td colspan="2">No students found matching the criteria.</td></tr>');
+                                }
+                            } else {
+                                console.error('No students data returned');
+                            }
+
+        
+                        //alert('Data submitted successfully!');
+                    },
+                    error: function (xhr, status, error) {
+                        // Handle errors
+                        console.error(error);
+                        alert('An error occurred: ' + error);
+                    }
+                });
+            });
+        
+            // Handle student selection and preview
+            $(document).on('click', '#results-body tr', function () {
+                var studentId = $(this).data('id');
+                var studentName = $(this).data('name');
+        
+                $(this).toggleClass('selected');
+                var selectedList = $('#selected-students-list');
+                if ($(this).hasClass('selected')) {
+                    selectedList.append(
+                        `<li class="list-group-item" data-id="${studentId}">${studentName} (Register Number: ${studentId})</li>`
+                    );
+                } else {
+                    selectedList.find(`li[data-id="${studentId}"]`).remove();
+                }
+
+            });
+        
+            // Edit button functionality
+            $('#edit-btn').on('click', function() {
+                $('#submitted-section').hide();
+                $('#form-section').show();
+            });
+        
+            $('#submit-selected-students').on('click', function () {
+                let selectedStudents = [];
+                $('#selected-students-list li').each(function () {
+                    selectedStudents.push($(this).data('id'));
+                });
+
+                // Send the selected students' data to the backend via AJAX
+                $.ajax({
+                    url: '/login/staff/',  // Django URL for attendance submission
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}' }, // CSRF token for security
+                    data: JSON.stringify({
+                        selected_students: selectedStudents,
+                        date: $('#date').val(),
+                        department: $('#department').val(),
+                        year: $('#year').val(),
+                        section: $('#section').val(),
+                        hour: $('#hour').val(),
+                        day_order: $('#day_order').val(),
+                        mode_handle: $('#mode_handle').val(),
+                    }),
+                    success: function (response) {
+                        alert('Attendance has been successfully marked!');
+                        window.location.reload(); // Reload the page
+                    },
+                    error: function (error) {
+                        console.error('Error:', error);
+                        alert('Something went wrong!');
+                    }
+                });
+            });
+            
+            window.onbeforeunload = function() {
+                return "Are you sure you want to leave this page?";
+            };
+
+        </script>
+        
+</body>
+</html>

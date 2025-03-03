@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Management Portal</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Previous styles remain the same */
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --secondary-color: #64748b;
+            --background-color: #f1f5f9;
+            --surface-color: #ffffff;
+            --error-color: #ef4444;
+            --success-color: #22c55e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--background-color);
+            color: #1e293b;
+            line-height: 1.5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            padding: 2rem;
+        }
+
+        .header {
+            background: var(--surface-color);
+            padding: 1rem 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            color: #0f172a;
+        }
+
+        .card {
+            background: var(--surface-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group.hidden {
+            display: none;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--secondary-color);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Staff Management Portal</h1>
+        </div>
+
+        <div class="card form-container">
+            <form method="post" action="{% url 'attendance2226' %}">
+                {% csrf_token %}
+                <div class="form-grid">
+                    <!-- Initial visible fields -->
+                    <div class="form-group" id="nameGroup">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" name="name" required placeholder="Enter staff member's full name">
+                    </div>
+
+                    <div class="form-group" id="positionGroup">
+                        <label for="position">Position</label>
+                        <select id="position" name="position" required onchange="showRelevantFields()">
+                            <option value="">Select Position</option>
+                            <option value="HOD">HEAD OF THE DEPARTMENT</option>
+                            <option value="STAFF/AP">STAFF/AP</option>
+                            <option value="STAFF/ASP">STAFF/ASP</option>
+                            <option value="LAB INCHARGE">LAB INCHARGE</option>
+                            <option value="COE">COE</option>
+                            <option value="PRINCIPAL">PRINCIPAL</option>
+                            <option value="ADMIN">ADMIN</option>
+                        </select>
+                    </div>
+
+                    <!-- Hidden fields initially -->
+                    <div class="form-group hidden" id="collegeGroup">
+                        <label for="college">Institution</label>
+                        <select id="college" name="college" required>
+                            <option value="">Select Institution</option>
+                            <option value="PAAVAI ENGINEERING COLLEGE">Paavai Engineering College</option>
+                            <option value="PAAVAI COLLEGE OF ENGINEERING">Paavai College of Engineering</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group hidden" id="departmentGroup">
+                        <label for="department">Department</label>
+                        <select id="department" name="department">
+                            <option value="">Select Department</option>
+                            <option value="Agricultural Engineering">Agricultural Engineering</option>
+                            <option value="Aeronautical Engineering">Aeronautical Engineering</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group hidden" id="subjectGroup">
+                        <label for="subject_handling">Subjects Handling</label>
+                        <input type="text" id="subject_handling" name="subject_handling" placeholder="Enter subjects">
+                    </div>
+
+                    <div class="form-group hidden" id="dateOfJoinGroup">
+                        <label for="date_of_join">Date of Join</label>
+                        <input type="date" id="date_of_join" name="date_of_join">
+                    </div>
+
+                    <div class="form-group hidden" id="usernameGroup">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" placeholder="Enter username">
+                    </div>
+                    
+                    <div class="form-group hidden" id="passwordGroup">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" placeholder="Enter password">
+                    </div>
+                </div>
+                <button type="submit">
+                    <i class="fas fa-user-plus"></i>
+                    PROCEED
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!DOCTYPE html>
+<!-- Previous HTML remains exactly the same until the script tag -->
+
+<script>
+    function showRelevantFields() {
+        const position = document.getElementById("position").value;
+        const fields = {
+            collegeGroup: document.getElementById("collegeGroup"),
+            departmentGroup: document.getElementById("departmentGroup"),
+            subjectGroup: document.getElementById("subjectGroup"),
+            dateOfJoinGroup: document.getElementById("dateOfJoinGroup"),
+            usernameGroup: document.getElementById("usernameGroup"),
+            passwordGroup: document.getElementById("passwordGroup")
+        };
+
+        // Hide all fields first
+        Object.values(fields).forEach(field => field.classList.add("hidden"));
+
+        // Show relevant fields based on position
+        if (position) {
+            fields.usernameGroup.classList.remove("hidden");
+            fields.passwordGroup.classList.remove("hidden");
+            fields.dateOfJoinGroup.classList.remove("hidden");
+
+            if (["STAFF/AP", "STAFF/ASP", "LAB INCHARGE"].includes(position)) {
+                // Show all fields for staff positions
+                fields.collegeGroup.classList.remove("hidden");
+                fields.departmentGroup.classList.remove("hidden");
+                fields.subjectGroup.classList.remove("hidden");
+            }
+            else if (position === "HOD") {
+                // Show all fields except lab handling for HOD
+                fields.collegeGroup.classList.remove("hidden");
+                fields.departmentGroup.classList.remove("hidden");
+                fields.subjectGroup.classList.remove("hidden");
+            }
+            else if (["COE", "PRINCIPAL"].includes(position)) {
+                // Show institution for COE and PRINCIPAL, but not for ADMIN
+                fields.collegeGroup.classList.remove("hidden");
+            }
+            // For ADMIN, only date of joining, username and password are shown
+        }
+
+        // Update required attributes based on visibility
+        Object.entries(fields).forEach(([id, element]) => {
+            const input = element.querySelector('input, select');
+            if (input) {
+                input.required = !element.classList.contains("hidden");
+            }
+        });
+    }
+</script>
+</body>
+</html>

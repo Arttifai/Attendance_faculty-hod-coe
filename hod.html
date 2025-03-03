@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/4.3.0/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .sidebar {
+            width: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #111;
+            color: white;
+            height: 100%;
+            padding-top: 20px;
+            transition: 0.3s;
+            z-index: 1000;
+            overflow-x: hidden;
+        }
+        .sidebar.open {
+            width: 250px;
+        }
+
+        .sidebar a {
+            padding: 8px 16px;
+            text-decoration: none;
+            font-size: 18px;
+            color: white;
+            display: block;
+            transition: 0.3s;
+        }
+        .sidebar a:hover {
+            background-color: #575757;
+        }
+
+        .close-btn {
+            font-size: 30px;
+            color: white;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .text-center {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .fa {
+            margin-right: 10px;
+        }
+
+        .hamburger {
+            cursor: pointer;
+        }
+
+        .hamburger input {
+            display: none;
+        }
+
+        .hamburger svg {
+            height: 3em;
+            transition: transform 600ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .line {
+            fill: none;
+            stroke: rgb(8, 8, 8);
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-width: 3;
+            transition: stroke-dasharray 600ms cubic-bezier(0.4, 0, 0.2, 1),
+                        stroke-dashoffset 600ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .line-top-bottom {
+            stroke-dasharray: 12 63;
+        }
+
+        .hamburger input:checked + svg {
+            transform: rotate(-45deg);
+        }
+
+        .hamburger input:checked + svg .line-top-bottom {
+            stroke-dasharray: 20 300;
+            stroke-dashoffset: -32.42;
+        }
+        .details-info {
+            font-size: 12px;
+            font-weight: lighter;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+    </style>
+</head>
+<body>
+    <label class="hamburger">
+        <input type="checkbox" id="hamburgerToggle">
+        <svg viewBox="0 0 32 32">
+            <path class="line line-top-bottom" d="M27 10 13 10C10.8 10 9 8.2 9 6 9 3.5 10.8 2 13 2 15.2 2 17 3.8 17 6L17 26C17 28.2 18.8 30 21 30 23.2 30 25 28.2 25 26 25 23.8 23.2 22 21 22L7 22"></path>
+            <path class="line" d="M7 16 27 16"></path>
+        </svg>
+    </label>
+
+    <div class="sidebar" id="sidebar">
+        <div class="text-center py-3 d-flex justify-content-between">
+            <h4>Dashboard</h4>
+            <button class="close-btn" onclick="closeSidebar()">×</button>
+        </div>
+        <a href="mainindex.html"><i class="fa fa-tachometer-alt"></i> Dashboard</a>
+        <a href="#"><i class="fa fa-filter"></i> Filter</a>
+        <a href="hodinput/"><i class="fa fa-user-plus"></i> Add Students</a>
+        <a href="#"><i class="fa fa-cogs"></i> Faculty Load</a>
+        <a href="#"><i class="fa fa-calendar"></i> Events</a>
+        <hr>
+        <a href="#"><i class="fa fa-sign-out-alt"></i> Sign out</a>
+    </div>
+
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row mb-4">
+                <!-- Total Students -->
+                <div class="col-md-3">
+                    <div class="card text-white bg-primary">
+                        <div class="card-body d-flex align-items-center">
+                            <i class="fas fa-users fa-3x me-3"></i>
+                            <div>
+                                <h5>Total Students</h5>
+                                <h2 id="totalStudents">{{ total_students }}</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Boys -->
+                <div class="col-md-3">
+                    <div class="card text-white bg-success">
+                        <div class="card-body d-flex align-items-center">
+                            <i class="fas fa-male fa-3x me-3"></i>
+                            <div>
+                                <h5>Boys</h5>
+                                <h2 id="totalBoys">{{ gender_data.m|default:"0" }}</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Girls -->
+                <div class="col-md-3">
+                    <div class="card text-white bg-info">
+                        <div class="card-body d-flex align-items-center">
+                            <i class="fas fa-female fa-3x me-3"></i>
+                            <div>
+                                <h5>Girls</h5>
+                                <h2 id="totalGirls">{{ gender_data.f|default:"0" }}</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Average Present % -->
+                <div class="col-md-3">
+                    <div class="card text-white bg-danger">
+                        <div class="card-body d-flex align-items-center">
+                            <i class="fas fa-percentage fa-3x me-3"></i>
+                            <div>
+                                <h5>Average Present %</h5>
+                                <h2 id="avgPresent">{{ avg_attendance }}</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-lg-8">
+                    <div class="card mb-4">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Subject Chart</h6>
+                            <select id="yearDropdown" class="form-control" style="width: 100px;">
+                                <option value="2">Year 2</option>
+                                <option value="3">Year 3</option>
+                                <option value="4">Year 4</option>
+                            </select>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-area" style="height: 100%">
+                                <canvas id="subjectBarChart" ></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card mb-4">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Gender Chart</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-pie" >
+                                <canvas id="pieChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-lg-8" style="height: 60%">
+                    <div class="card mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Average Chart</h6>
+                        </div>
+                        <div class="card-body" style="height: 100%">
+                            <div class="chart-bar">
+                                <canvas id="lineChart"></canvas>
+                            </div>
+                            <hr>
+                        </div>
+                    </div>
+                </div>
+            
+                <div class="col-lg-4">
+                    <div class="card mb-4" style="height: 90%">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Products Sold</h6>
+                            <div class="dropdown no-arrow">
+                                <a class="dropdown-toggle btn btn-primary btn-sm" href="#" role="button" id="dropdownMenuLink"
+                                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Month <i class="fas fa-chevron-down"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                                     aria-labelledby="dropdownMenuLink">
+                                    <div class="dropdown-header">Select Period</div>
+                                    <a class="dropdown-item" href="#">Today</a>
+                                    <a class="dropdown-item" href="#">Week</a>
+                                    <a class="dropdown-item active" href="#">Month</a>
+                                    <a class="dropdown-item" href="#">This Year</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body" style="height: 70%; overflow-y: auto;">
+                            <div class="mb-3">
+                                <div class="small text-gray-500">Oblong T-Shirt
+                                    <div class="small float-right"><b>600 of 800 Items</b></div>
+                                </div>
+                                <div class="progress" style="height: 12px;">
+                                    <div class="progress-bar bg-warning" role="progressbar" style="width: 80%" aria-valuenow="80"
+                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="small text-gray-500">Gundam 90' Editions
+                                    <div class="small float-right"><b>500 of 800 Items</b></div>
+                                </div>
+                                <div class="progress" style="height: 12px;">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: 70%" aria-valuenow="70"
+                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-4 col-lg-4">
+                    <div class="card">
+                        <div class="card-header py-4 bg-primary d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-light">below 60%</h6>
+                            <span class="badge badge-light" id="below60-count">0</span>
+                        </div>
+                        <div class="card-body" style="height: 300px; overflow-y: auto;">
+                            <ul class="list-group" id="below60">
+                                <!-- Content will be added here -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>        
+                
+                <div class="col-xl-4 col-lg-4">
+                    <div class="card">
+                        <div class="card-header py-4 bg-primary d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-light">Average 60% to 80%</h6>
+                            <span class="badge badge-light" id="between60and80-count">0</span>
+                        </div>
+                        <div class="card-body" style="height: 300px; overflow-y: auto;">
+                            <ul class="list-group">
+                                <div id="between60and80">
+                                    <!-- Content will be added here -->
+                                </div>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-4 col-lg-4">
+                    <div class="card">
+                        <div class="card-header py-4 bg-primary d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-light">Good 80% to 100%</h6>
+                            <span class="badge badge-light" id="above80-count">0</span>
+                        </div>
+                        <div class="card-body" style="height: 300px; overflow-y: auto;">
+                            <ul class="list-group">
+                                <div id="above80">
+                                    <!-- Content will be added here -->
+                                </div>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            let lineChartInstance = null;
+
+            function updateLineChart() {
+                $.ajax({
+                    url: "/api/attendance-line/", // API endpoint
+                    type: "GET",
+                    dataType: "json",
+                    success: function (data) {
+                        console.log("Updated Data:", data); // Debugging
+
+                        if (lineChartInstance) {
+                            // Update existing chart
+                            lineChartInstance.data.labels = data.labels;
+                            lineChartInstance.data.datasets[0].data = data.values;
+                            lineChartInstance.update(); // Refresh chart with new data
+                        } else {
+                            // Create chart if it doesn't exist
+                            let ctx = document.getElementById('lineChart').getContext('2d');
+                            lineChartInstance = new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels: data.labels,
+                                    datasets: [{
+                                        label: 'Avg Present %',
+                                        data: data.values,
+                                        fill: false, // No area fill under the line
+                                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                                        borderColor: 'rgba(54, 162, 235, 1)',
+                                        borderWidth: 2,
+                                        tension: 0.1 // Smoothing of the line (optional)
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true,
+                                            max: 100
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error fetching attendance data:", error);
+                    }
+                });
+            }
+
+            // Initial call
+            updateLineChart();
+
+            // Auto-refresh every 10 seconds
+            setInterval(updateLineChart, 10000);
+        });
+
+
+        $(document).ready(function () {
+            let pieChartInstance = null;
+
+            function updatePieChart() {
+                $.ajax({
+                    url: "/api/gender-pie-chart/",  // Replace with the correct URL
+                    type: "GET",
+                    dataType: "json",
+                    success: function (data) {
+                        console.log("Received Data:", data);  // Debugging
+
+                        if (pieChartInstance) {
+                            // Update existing chart
+                            pieChartInstance.data.labels = data.labels;
+                            pieChartInstance.data.datasets[0].data = data.values;
+                            pieChartInstance.update(); // Refresh chart with new data
+                        } else {
+                            // Create chart if it doesn't exist
+                            let ctx = document.getElementById('pieChart').getContext('2d');
+                            pieChartInstance = new Chart(ctx, {
+                                type: 'pie',
+                                data: {
+                                    labels: data.labels,
+                                    datasets: [{
+                                        data: data.values,
+                                        backgroundColor: ['#36A2EB', '#FF6384'],  // Male vs Female colors
+                                        hoverBackgroundColor: ['#36A2EB', '#FF6384']
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    plugins: {
+                                        legend: {
+                                            position: 'top',
+                                        },
+                                        tooltip: {
+                                            callbacks: {
+                                                label: function(tooltipItem) {
+                                                    return tooltipItem.label + ": " + tooltipItem.raw;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error fetching gender data:", error);
+                    }
+                });
+            }
+
+            // Call initially
+            updatePieChart();
+
+            // Auto-refresh every 10 sec (optional)
+            setInterval(updatePieChart, 10000);
+        });
+
+        $(document).ready(function () {
+            let barChartInstance = null;
+
+            // Function to update the subject-wise attendance chart with a given year.
+            function updateSubjectBarChart(year) {
+                $.ajax({
+                    url: '/api/subject-wise-attendance/',  // Adjust the endpoint URL as needed
+                    type: 'GET',
+                    data: { year: year }, // Pass the selected year as a query parameter
+                    dataType: 'json',
+                    success: function (data) {
+                        console.log("Subject-wise Attendance Data:", data);
+
+                        if (!data.labels || !data.values) {
+                            console.error("Data format error: expected 'labels' and 'values'");
+                            return;
+                        }
+
+                        if (barChartInstance) {
+                            barChartInstance.data.labels = data.labels;
+                            barChartInstance.data.datasets[0].data = data.values;
+                            barChartInstance.update();
+                        } else {
+                            let ctx = document.getElementById('subjectBarChart').getContext('2d');
+                            barChartInstance = new Chart(ctx, {
+                                type: 'bar',
+                                data: {
+                                    labels: data.labels,
+                                    datasets: [{
+                                        label: 'Subject-wise Attendance (%)',
+                                        data: data.values,
+                                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                                        borderColor: 'rgba(75, 192, 192, 1)',
+                                        borderWidth: 1
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true,
+                                            max: 100
+                                        },
+                                        x: {
+                                            ticks: {
+                                                font: {
+                                                    size: 10 // Reduce the font size (adjust as needed)
+                                                },
+                                                maxRotation: 30, // Slight rotation to fit better
+                                                minRotation: 0,
+                                                autoSkip: false // Ensures all labels appear
+                                            }
+                                        }
+                                    },
+                                    plugins: {
+                                        tooltip: {
+                                            callbacks: {
+                                                title: function(tooltipItem) {
+                                                    return tooltipItem[0].label; // Show full subject name in tooltip
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                            });
+                        }
+
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error fetching subject-wise attendance:", error);
+                    }
+                });
+            }
+
+            // Initial load of the chart using the default selected year (the first option)
+            let initialYear = $('#yearDropdown').val();
+            updateSubjectBarChart(initialYear);
+
+            // Event listener: when the dropdown value changes, update the chart.
+            $("#yearDropdown").on("change", function() {
+                let selectedYear = $(this).val();
+                console.log("Selected Year:", selectedYear);
+                updateSubjectBarChart(selectedYear);
+            });
+        });
+
+        $(document).ready(function () {
+            console.log("Document ready"); // Debug log
+
+            // Test if jQuery is working
+            if (typeof jQuery != 'undefined') {
+                console.log("jQuery is loaded");
+            } else {
+                console.error("jQuery is not loaded");
+            }
+
+            // Function to populate lists dynamically
+            function populateList(category, elementId, data) {
+                let listElement = $(`#${elementId}`);
+
+                if (listElement.length > 0) {
+                    listElement.empty(); // Clear existing content
+
+                    if (data.length === 0) {
+                        console.warn(`No data for ${category}`);
+                    }
+
+                    data.forEach(student => {
+                        let colorClass = ""; // Default class
+
+                        // Assign colors based on percentage
+                        if (student.percentage >= 80) {
+                            colorClass = "list-group-item-success"; // Green
+                        } else if (student.percentage >= 60) {
+                            colorClass = "list-group-item-warning"; // Yellow/Orange
+                        } else {
+                            colorClass = "list-group-item-danger"; // Red
+                        }
+
+                        listElement.append(`
+                            <li class="list-group-item ${colorClass}">
+                                <div class="d-flex justify-content-between">
+                                    <span>${student.stud_name} (Year: ${student.year})</span>
+                                    <span>${student.percentage}%</span>
+                                </div>
+                            </li>
+                        `);
+                    });
+
+                    $(`#${elementId}-count`).text(data.length);
+                } else {
+                    console.warn(`Element #${elementId} not found!`);
+                }
+            }
+
+
+            // Fetch data using AJAX
+            $.ajax({
+                url: '/hod/student-attendance/',  // Adjust the URL to match your Django URL configuration.
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    console.log("AJAX success:", data); // Debugging log
+
+                    // Populate lists dynamically with the received data
+                    populateList("below60", "below60", data.below60);
+                    populateList("between60and80", "between60and80", data.between60and80);
+                    populateList("above80", "above80", data.above80);
+                },
+                error: function (error) {
+                    console.error('Error fetching attendance data:', error);
+                }
+            });
+        });
+
+        // Toggle sidebar on hamburger checkbox check/uncheck
+        document.getElementById("hamburgerToggle").addEventListener("change", function() {
+            var sidebar = document.getElementById("sidebar");
+            if (this.checked) {
+                sidebar.classList.add("open");
+            } else {
+                sidebar.classList.remove("open");
+            }
+        });
+
+        // Function to close sidebar when clicking on the close button
+        function closeSidebar() {
+            var checkbox = document.getElementById("hamburgerToggle");
+            checkbox.checked = false;
+            document.getElementById("sidebar").classList.remove("open");
+        }    
+        window.onbeforeunload = function() {
+            return "Are you sure you want to leave this page?";
+        };
+
+    </script>
+    
+</body>
+</html>

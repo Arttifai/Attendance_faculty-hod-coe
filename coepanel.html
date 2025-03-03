@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="img/logo/logo.png" rel="icon">
+    <title>Dynamic Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/4.3.0/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #135698;
+            overflow-x: hidden;
+        }
+        .sidebar {
+            width: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #111;
+            color: white;
+            height: 100%;
+            padding-top: 20px;
+            transition: 0.3s;
+            z-index: 1000;
+            overflow-x: hidden;
+        }
+
+        .sidebar.open {
+            width: 250px;
+        }
+
+        .sidebar a {
+            padding: 8px 16px;
+            text-decoration: none;
+            font-size: 18px;
+            color: white;
+            display: block;
+            transition: 0.3s;
+        }
+
+        .sidebar a:hover {
+            background-color: #575757;
+        }
+
+        .close-btn {
+            font-size: 30px;
+            color: white;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .content {
+            margin-left: 0;
+            transition: margin-left 0.3s ease-in-out;
+            padding: 20px;
+            width: 100%;
+        }
+
+        .content.open {
+            margin-left: 250px;
+        }
+
+        .card {
+            box-shadow: 0 4px 8px rgba(106, 58, 58, 0.1);
+        }
+        .body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #135698;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            width: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #111;
+            color: white;
+            height: 100%;
+            padding-top: 20px;
+            transition: 0.3s;
+            z-index: 1000;
+            overflow-x: hidden;
+        }
+
+        .sidebar.open {
+            width: 250px;
+        }
+
+        .sidebar a {
+            padding: 8px 16px;
+            text-decoration: none;
+            font-size: 18px;
+            color: white;
+            display: block;
+            transition: 0.3s;
+        }
+
+        .sidebar a:hover {
+            background-color: #575757;
+        }
+
+        .close-btn {
+            font-size: 30px;
+            color: white;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .content {
+            margin-left: 0;
+            transition: margin-left 0.3s ease-in-out;
+            padding: 20px;
+            width: 100%;
+        }
+
+        .content.open {
+            margin-left: 250px;
+        }
+
+        .card {
+            box-shadow: 0 4px 8px rgba(181, 88, 88, 0.1);
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #343a40;
+            padding: 10px;
+            color: white;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .toolbar .btn {
+            color: white;
+            background-color: #007bff;
+        }
+
+        .toolbar .btn:hover {
+            background-color: #0056b3;
+        }
+
+        .toolbar .icon {
+            margin-left: 20px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .toolbar .icon:hover {
+            color: #007bff;
+        }
+        .navbar {
+           background-color: #3f51b5;
+        }
+
+        .navbar-light .navbar-nav .nav-link {
+            color: white;
+        }
+
+        .navbar-light .navbar-nav .nav-link:hover {
+            color: #dcdcdc;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand navbar-light bg-navbar topbar mb-4 static-top">
+        <div class="hamburger icon" id="hamburgerToggle">
+            <i class="fas fa-bars fa-2x"></i>
+        </div>
+        <ul class="navbar-nav ml-auto">
+          <!-- Alerts Dropdown -->
+          <li class="nav-item dropdown no-arrow mx-1">
+            <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown"
+              aria-haspopup="true" aria-expanded="false">
+              <i class="fas fa-bell fa-fw"></i>
+              <span class="badge badge-danger badge-counter"></span>
+            </a>
+            <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="alertsDropdown">
+              <h6 class="dropdown-header">
+                Alerts Center
+              </h6>
+              <a class="dropdown-item d-flex align-items-center" href="#">
+                <div class="mr-3">
+                  <div class="icon-circle bg-primary">
+                    <i class="fas fa-file-alt text-white"></i>
+                  </div>
+                </div>
+                <div>
+                  <div class="small text-gray-500">December 12, 2019</div>
+                  <span class="font-weight-bold">A new monthly report is ready to download!</span>
+                </div>
+              </a>
+              <a class="dropdown-item d-flex align-items-center" href="#">
+                <div class="mr-3">
+                  <div class="icon-circle bg-success">
+                    <i class="fas fa-donate text-white"></i>
+                  </div>
+                </div>
+                <div>
+                  <div class="small text-gray-500">December 7, 2019</div>
+                  $290.29 has been deposited into your account!
+                </div>
+              </a>
+              <a class="dropdown-item d-flex align-items-center" href="#">
+                <div class="mr-3">
+                  <div class="icon-circle bg-warning">
+                    <i class="fas fa-exclamation-triangle text-white"></i>
+                  </div>
+                </div>
+                <div>
+                  <div class="small text-gray-500">December 2, 2019</div>
+                  Spending Alert: We've noticed unusually high spending for your account.
+                </div>
+              </a>
+              <a class="dropdown-item text-center small text-gray-500" href="#">Show All Alerts</a>
+            </div>
+          </li>
+    
+          <!-- Messages Dropdown -->
+          <li class="nav-item dropdown no-arrow mx-1">
+            <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button" data-toggle="dropdown"
+              aria-haspopup="true" aria-expanded="false">
+              <i class="fas fa-envelope fa-fw"></i>
+              <span class="badge badge-warning badge-counter">2</span>
+            </a>
+            <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="messagesDropdown">
+              <h6 class="dropdown-header">
+                Message Center
+              </h6>
+              <a class="dropdown-item d-flex align-items-center" href="#">
+                <div class="dropdown-list-image mr-3">
+                  <img class="rounded-circle" src="img/man.png" style="max-width: 30px" alt="">
+                  <div class="status-indicator bg-success"></div>
+                </div>
+                <div class="font-weight-bold">
+                  <div class="text-truncate">H.</div>
+                  <div class="small text-gray-500">Udin Cilok · 58m</div>
+                </div>
+              </a>
+              <a class="dropdown-item d-flex align-items-center" href="#">
+                <div class="dropdown-list-image mr-3">
+                  <img class="rounded-circle" src="img/girl.png" style="max-width: 30px" alt="">
+                  <div class="status-indicator bg-default"></div>
+                </div>
+                <div>
+                  <div class="text-truncate">A...</div>
+                  <div class="small text-gray-500">Jaenab · 2w</div>
+                </div>
+              </a>
+              <a class="dropdown-item text-center small text-gray-100" href="#">Read More Messages</a>
+            </div>
+          </li>
+    
+          <!-- Tasks Dropdown -->
+          <li class="nav-item dropdown no-arrow mx-1">
+            <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button" data-toggle="dropdown"
+              aria-haspopup="true" aria-expanded="false">
+              <i class="fas fa-tasks fa-fw"></i>
+              <span class="badge badge-success badge-counter">3</span>
+            </a>
+            <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="messagesDropdown">
+              <h6 class="dropdown-header">
+                Task
+              </h6>
+              <a class="dropdown-item align-items-center" href="#">
+                <div class="mb-3">
+                  <div class="small text-gray-500">Design Button
+                    <div class="small float-right"><b>50%</b></div>
+                  </div>
+                  <div class="progress" style="height: 12px;">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: 50%" aria-valuenow="50"
+                      aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                </div>
+              </a>
+              <a class="dropdown-item align-items-center" href="#">
+                <div class="mb-3">
+                  <div class="small text-gray-500">Make Beautiful Transitions
+                    <div class="small float-right"><b>30%</b></div>
+                  </div>
+                  <div class="progress" style="height: 12px;">
+                    <div class="progress-bar bg-warning" role="progressbar" style="width: 30%" aria-valuenow="30"
+                      aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                </div>
+              </a>
+              <a class="dropdown-item align-items-center" href="#">
+                <div class="mb-3">
+                  <div class="small text-gray-500">Create Pie Chart
+                    <div class="small float-right"><b>75%</b></div>
+                  </div>
+                  <div class="progress" style="height: 12px;">
+                    <div class="progress-bar bg-danger" role="progressbar" style="width: 75%" aria-valuenow="75"
+                      aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                </div>
+              </a>
+              <a class="dropdown-item text-center small text-gray-500" href="#">View All Tasks</a>
+            </div>
+          </li>
+    
+          <div class="topbar-divider d-none d-sm-block"></div>
+    
+          <!-- User Dropdown -->
+          <li class="nav-item dropdown no-arrow">
+            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown"
+              aria-haspopup="true" aria-expanded="false">
+              <img class="img-profile rounded-circle" src="img/boy.png" style="max-width: 20px">
+              <span class="ml-2 d-none d-lg-inline text-white small">Maman Ketoprak</span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+              <a class="dropdown-item" href="#">
+                <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                Profile
+              </a>
+            </div>
+          </li>
+        </ul>
+      </nav>
+    <div class="sidebar" id="sidebar">
+        <div class="text-center py-3 d-flex justify-content-between">
+            <h4>Dashboard</h4>
+            <button class="close-btn" onclick="closeSidebar()">×</button>
+         </div>
+        <a href="mainindex.html"> Dashboard <i class="fa fa-tachometer-alt"></i></a>
+        <a href="filter.html"> Filter <i class="fa fa-filter"></i></a>
+        <a href="hodinput.html"> Add Students <i class="fa fa-user-plus"></i></a>
+        <a href="#"> Faculty Load <i class="fa fa-cogs"></i> </a>
+        <a href="events.html">Events <i class="fa fa-calendar"></i> </a>
+        <hr>
+        <a href="#"><i class="fa fa-sign-out-alt"></i> Sign out</a>
+    </div>
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row mb-4">
+                <div class="col-xl-4 col-md-6 mb-4">
+                    <div class="card h-80">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-center">
+                                    <div class="text-xs font-weight-bold text-uppercase mb-1">Total Student</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">149</div>
+                                    <div class="mt-0 mb-0 text-muted text-xs">
+                                    </div>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-users fa-2x text-primary"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4 col-md-6 mb-4">
+                    <div class="card h-80">
+                      <div class="card-body">
+                        <div class="row align-items-center">
+                          <div class="col mr-2">
+                            <div class="text-center">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">Boys</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">79</div>
+                            <div class="mt-0 mb-0 text-muted text-xs">
+                            </div>
+                            </div>
+                          </div>
+                          <div class="col-auto">
+                            <i class="fas fa-male fa-2x text-primary"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Girls -->
+                  <div class="col-xl-4 col-md-6 mb-4">
+                    <div class="card h-80">
+                      <div class="card-body">
+                        <div class="row align-items-center">
+                          <div class="col mr-2">
+                            <div class="text-center">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">Girls</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">89</div>
+                            <div class="mt-0 mb-0 text-muted text-xs">
+                            </div>
+                            </div>
+                          </div>
+                          <div class="col-auto">
+                            <i class="fas fa-female fa-2x text-primary"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                <div class="row mb-4">
+                <div class="col-lg-8">
+                    <div class="card mb-4">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Average Report</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-area">
+                                <canvas id="myAreaChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card mb-6">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Donut Chart</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-pie">
+                                <canvas id="myPieChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-4">
+                <div class="col-lg-8" style="height: 60%">
+                    <div class="card mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Subject Report</h6>
+                        </div>
+                        <div class="card-body" style="height: 100%">
+                            <div class="chart-bar">
+                                <canvas id="myBarChart"></canvas>
+                            </div>
+                            <hr>
+                        </div>
+                    </div>
+                  </div>
+                <div class="col-lg-4">
+                    <div class="card mb-4" style="height:80%">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Products Sold</h6>
+                            <div class="dropdown no-arrow">
+                                <a class="dropdown-toggle btn btn-primary btn-sm" href="#" role="button" id="dropdownMenuLink"
+                                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Month <i class="fas fa-chevron-down"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                                     aria-labelledby="dropdownMenuLink">
+                                    <div class="dropdown-header">Select Period</div>
+                                    <a class="dropdown-item" href="#">Today</a>
+                                    <a class="dropdown-item" href="#">Week</a>
+                                    <a class="dropdown-item active" href="#">Month</a>
+                                    <a class="dropdown-item" href="#">This Year</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body" style="height: 70%; overflow-y: auto;">
+                            <div class="mb-3">
+                                <div class="small text-gray-500">Oblong T-Shirt
+                                    <div class="small float-right"><b>600 of 800 Items</b></div>
+                                </div>
+                                <div class="progress" style="height: 12px;">
+                                    <div class="progress-bar bg-warning" role="progressbar" style="width: 80%" aria-valuenow="80"
+                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="small text-gray-500">Gundam 90' Editions
+                                    <div class="small float-right"><b>500 of 800 Items</b></div>
+                                </div>
+                                <div class="progress" style="height: 12px;">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: 70%" aria-valuenow="70"
+                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4 col-lg-4">
+                    <div class="card">
+                        <div class="card-header py-4 bg-primary d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-light">below 50%</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group">
+                                <li class="list-group-item">"Great service, thank you!"</li>
+                                <li class="list-group-item">"Can I get more details about product X?"</li>
+                                <li class="list-group-item">"Issue with my last order, please assist."</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>        
+                <div class="col-xl-4 col-lg-4">
+                    <div class="card">
+                        <div class="card-header py-4 bg-primary d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-light">Average 70% to 80%</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group">
+                                <li class="list-group-item">"Great service, thank you!"</li>
+                                <li class="list-group-item">"Can I get more details about product X?"</li>
+                                <li class="list-group-item">"Issue with my last order, please assist."</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div> 
+
+                <div class="col-xl-4 col-lg-4">
+                    <div class="card">
+                        <div class="card-header py-4 bg-primary d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-light">Good 80% to 100%</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group">
+                                <li class="list-group-item">"Great service, thank you!"</li>
+                                <li class="list-group-item">"Can I get more details about product X?"</li>
+                                <li class="list-group-item">"Issue with my last order, please assist."</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </div>
+    <script>
+        // Sidebar Toggle
+        const sidebar = document.getElementById('sidebar');
+        const hamburgerToggle = document.getElementById('hamburgerToggle');
+        const content = document.querySelector('.content');
+
+        hamburgerToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            content.classList.toggle('open');
+        });
+
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            content.classList.remove('open');
+        }
+
+        // Chart.js Initialization
+        const barChart = new Chart(document.getElementById('myBarChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Earnings',
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    data: [3000, 4000, 3200, 5000, 6000, 7000],
+                }]
+            },
+            options: { responsive: true }
+        });
+
+        const pieChart = new Chart(document.getElementById('myPieChart'), {
+            type: 'pie',
+            data: {
+                labels: ['A', 'B', 'C', 'D', 'F'],
+                datasets: [{
+                    backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'],
+                    data: [55, 30, 15, 5, 3],
+                }]
+            },
+            options: { responsive: true }
+        });
+    </script>
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+     </body>
+</body>
+</html>

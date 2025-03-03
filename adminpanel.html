@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #1e1e2f;
+        color: #fff;
+        margin: 0;
+        padding: 0;
+    }
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    .header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    .header h1 {
+        font-size: 2.5rem;
+        color: #00bcd4;
+    }
+    .cards {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    .card {
+        flex: 1;
+        background: #2a2a3d;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    }
+    .card h2 {
+        font-size: 2rem;
+        margin: 10px 0;
+        color: #ff9800;
+    }
+    .card p {
+        font-size: 1rem;
+        color: #ddd;
+    }
+    .chart-section {
+        margin-bottom: 30px;
+    }
+    .chart-filters {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    .chart-filters button {
+        background: #00bcd4;
+        color: #fff;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+    .chart-filters button:hover {
+        background: #0288d1;
+    }
+    canvas {
+        background: #2a2a3d;
+        border-radius: 10px;
+        padding: 20px;
+    }
+    .poor-performance {
+        background: #2a2a3d;
+        border-radius: 10px;
+        padding: 20px;
+    }
+    .poor-performance h3 {
+        color: #ff5722;
+    }
+    .poor-performance ul {
+        list-style: none;
+        padding: 0;
+    }
+    .poor-performance li {
+        margin: 10px 0;
+        font-size: 1rem;
+    }
+    .students-section {
+        display: none;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    .students-section .student-card {
+        flex: 1;
+        background: #2a2a3d;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+    }
+    .students-section .student-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    }
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        justify-content: center;
+        align-items: center;
+    }
+    .modal-content {
+        background: #2a2a3d;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+    }
+    .close-btn {
+        margin-top: 10px;
+        padding: 10px 20px;
+        background: #ff5722;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        color: #fff;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Attendance Dashboard</h1>
+        </div>
+        <div class="cards">
+            <div class="card" id="total-students" onclick="showModal('students-modal')">
+                <h2>1,200</h2>
+                <p>Total Students</p>
+            </div>
+            <div class="card" id="total-departments">
+                <h2>10</h2>
+                <p>Total Departments</p>
+            </div>
+            <div class="card" id="average-presenters">
+                <h2>85%</h2>
+                <p>Average Attendance</p>
+            </div>
+        </div>
+        <div class="chart-section">
+            <div class="chart-filters">
+                <button onclick="updateChart('year')">Year</button>
+                <button onclick="updateChart('month')">Month</button>
+                <button onclick="updateChart('week')">Week</button>
+                <button onclick="updateChart('day')">Day</button>
+            </div>
+            <canvas id="attendance-chart"></canvas>
+        </div>
+        <div class="poor-performance">
+            <h3>Poor Performing Departments</h3>
+            <ul>
+                <li>Department A: 30%</li>
+                <li>Department B: 35%</li>
+                <li>Department C: 40%</li>
+                <li>Department D: 42%</li>
+                <li>Department E: 45%</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="students-modal">
+        <div class="modal-content">
+            <h2>Colleges and Student Count</h2>
+            <div class="students-section">
+                <div class="student-card" onclick="navigateTo('pec.html')">
+                    <h2>PEC</h2>
+                    <p>500 Students</p>
+                </div>
+                <div class="student-card" onclick="navigateTo('pct.html')">
+                    <h2>PCT</h2>
+                    <p>400 Students</p>
+                </div>
+                <div class="student-card" onclick="navigateTo('pce.html')">
+                    <h2>PCE</h2>
+                    <p>300 Students</p>
+                </div>
+            </div>
+            <button class="close-btn" onclick="closeModal('students-modal')">Close</button>
+        </div>
+    </div>
+
+    <script>
+        // Modal functionality
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = "flex";
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = "none";
+        }
+
+        // Chart.js data and functionality
+        const chartData = {
+            year: { labels: ['2020', '2021', '2022', '2023', '2024'], data: [85, 87, 83, 88, 90] },
+            month: { labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'], data: [88, 85, 90, 87, 89] },
+            week: { labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'], data: [85, 86, 88, 87] },
+            day: { labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], data: [80, 85, 90, 87, 89] },
+        };
+
+        const ctx = document.getElementById('attendance-chart').getContext('2d');
+        const attendanceChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartData.year.labels,
+                datasets: [{
+                    label: 'Attendance',
+                    data: chartData.year.data,
+                    borderColor: '#00bcd4',
+                    fill: false,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true, labels: { color: '#fff' } }
+                },
+                scales: {
+                    x: { ticks: { color: '#fff' } },
+                    y: { ticks: { color: '#fff' } }
+                }
+            }
+        });
+
+        function updateChart(filter) {
+            attendanceChart.data.labels = chartData[filter].labels;
+            attendanceChart.data.datasets[0].data = chartData[filter].data;
+            attendanceChart.update();
+        }
+
+        // Navigation function
+        function navigateTo(page) {
+            window.location.href = page;
+        }
+        window.onbeforeunload = function() {
+            return "Are you sure you want to leave this page?";
+        };
+
+    </script>
+</body>
+</html>

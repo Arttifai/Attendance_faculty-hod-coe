@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOD - Add Students</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            background-image: url('input.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+            display: flex; /* Add flex layout to include sidebar and main content */
+        }
+        .sidebar {
+            width: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #111;
+            color: white;
+            height: 100%;
+            padding-top: 20px;
+            transition: 0.3s;
+            z-index: 1000;
+            overflow-x: hidden;
+        }
+        .sidebar.open {
+            width: 250px;
+        }
+
+        .sidebar a {
+            padding: 8px 16px;
+            text-decoration: none;
+            font-size: 18px;
+            color: white;
+            display: block;
+            transition: 0.3s;
+        }
+        .sidebar a:hover {
+            background-color: #575757;
+        }
+
+        .close-btn {
+            font-size: 30px;
+            color: white;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .text-center {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .fa {
+            margin-right: 10px;
+        }
+
+        .hamburger {
+            cursor: pointer;
+        }
+
+        .hamburger input {
+            display: none;
+        }
+
+        .hamburger svg {
+            height: 3em;
+            transition: transform 600ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .line {
+            fill: none;
+            stroke: rgb(8, 8, 8);
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-width: 3;
+            transition: stroke-dasharray 600ms cubic-bezier(0.4, 0, 0.2, 1),
+                        stroke-dashoffset 600ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .line-top-bottom {
+            stroke-dasharray: 12 63;
+        }
+
+        .hamburger input:checked + svg {
+            transform: rotate(-45deg);
+        }
+
+        .hamburger input:checked + svg .line-top-bottom {
+            stroke-dasharray: 20 300;
+            stroke-dashoffset: -32.42;
+        }
+        .details-info {
+            font-size: 12px;
+            font-weight: lighter;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <label class="hamburger">
+        <input type="checkbox" id="hamburgerToggle">
+        <svg viewBox="0 0 32 32">
+            <path class="line line-top-bottom" d="M27 10 13 10C10.8 10 9 8.2 9 6 9 3.5 10.8 2 13 2 15.2 2 17 3.8 17 6L17 26C17 28.2 18.8 30 21 30 23.2 30 25 28.2 25 26 25 23.8 23.2 22 21 22L7 22"></path>
+            <path class="line" d="M7 16 27 16"></path>
+        </svg>
+    </label>
+
+    <div class="sidebar" id="sidebar">
+        <div class="text-center py-3 d-flex justify-content-between">
+            <h4>Dashboard</h4>
+            <button class="close-btn" onclick="closeSidebar()">×</button>
+        </div>
+        <a href="mainindex.html"><i class="fa fa-tachometer-alt"></i> Dashboard</a>
+        <a href="#"><i class="fa fa-filter"></i> Filter</a>
+        <a href="hodinput.html"><i class="fa fa-user-plus"></i> Add Students</a>
+        <a href="#"><i class="fa fa-cogs"></i> Faculty Load</a>
+        <a href="#"><i class="fa fa-calendar"></i> Events</a>
+        <hr>
+        <a href="#"><i class="fa fa-sign-out-alt"></i> Sign out</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h2 class="text-center mb-4">Add Students for Attendance</h2>
+        
+        <!-- Success Message -->
+        <div id="success-message" class="alert alert-success" role="alert">
+            Data submitted successfully!
+        </div>
+
+        <form action="{% url 'hodinput' %}" method="POST" enctype="multipart/form-data" id="studentForm" novalidate>
+            <!-- Manual Student Entry -->
+            <h4>Manual Entry</h4>
+            <div id="student-list">
+                <!-- First row without removable "X" -->
+                <div class="row mb-3 align-items-center">
+                    <div class="col">
+                        <input type="text" class="form-control" name="REG_NO[]" placeholder="REG_NO" required>
+                    </div>
+                    <div class="col">
+                        <input type="text" class="form-control" name="name[]" placeholder="Name" required>
+                    </div>
+                    <div class="col">
+                        <input type="text" class="form-control" name="degree[]" placeholder="Degree" required>
+                    </div>
+                    <div class="col">
+                        <input type="text" class="form-control" name="department[]" placeholder="Department" required>
+                    </div>
+                    <div class="col">
+                        <select class="form-select" name="year[]" required>
+                            <option value="" disabled selected>Year</option>
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                        </select>
+                    </div>
+                    <div class="col">
+                        <input type="text" class="form-control" name="section[]" placeholder="Section" required>
+                    </div>
+                    <div class="col">
+                        <select class="form-select" name="gender[]" required>
+                            <option value="" disabled selected>Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" class="btn btn-remove disabled" disabled>X</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add More Button -->
+            <div class="mb-3 text-center">
+                <button type="button" class="btn btn-secondary" id="add-student-btn">Add More</button>
+            </div>
+
+            <!-- Excel Upload Section -->
+            <h4>Upload Excel File</h4>
+                <div class="mb-3">
+                    <label for="excelUpload" class="form-label">Upload Excel File (.csv, .xlsx)</label>
+                    {% csrf_token %}
+                    <input type="file" class="form-control" id="excelUpload" name="excel_file" accept=".csv, .xlsx" required>
+                    <small class="text-muted">Format: Register Number, Name, Degree, Department, Year, Section, Gender</small>
+                </div>
+    
+                <!-- Submit Button -->
+                <div class="text-center">
+                    <button type="submit" class="btn btn-custom">Submit</button>
+                </div>
+        </form>
+    </div>
+    <script>
+        // Toggle sidebar on hamburger checkbox check/uncheck
+        document.getElementById("hamburgerToggle").addEventListener("change", function() {
+            var sidebar = document.getElementById("sidebar");
+            if (this.checked) {
+                sidebar.classList.add("open");
+            } else {
+                sidebar.classList.remove("open");
+            }
+        });
+
+        // Function to close sidebar when clicking on the close button
+        function closeSidebar() {
+            var checkbox = document.getElementById("hamburgerToggle");
+            checkbox.checked = false;
+            document.getElementById("sidebar").classList.remove("open");
+        } 
+        const addStudentBtn = document.getElementById('add-student-btn');
+        const studentList = document.getElementById('student-list');
+        const form = document.getElementById('studentForm');
+        const excelUpload = document.getElementById('excelUpload');
+        const successMessage = document.getElementById('success-message');
+
+        // Add More Students
+        addStudentBtn.addEventListener('click', () => {
+            const newRow = document.createElement('div');
+            newRow.classList.add('row', 'mb-3', 'align-items-center');
+
+            newRow.innerHTML = `
+                <div class="col">
+                        <input type="text" class="form-control" name="REG_NO[]" placeholder="REG_NO" required>
+                </div>
+                <div class="col">
+                    <input type="text" class="form-control" name="name[]" placeholder="Name" required>
+                </div>
+                <div class="col">
+                    <input type="text" class="form-control" name="degree[]" placeholder="Degree" required>
+                </div>
+                <div class="col">
+                    <input type="text" class="form-control" name="department[]" placeholder="Department" required>
+                </div>
+                <div class="col">
+                    <select class="form-select" name="year[]" required>
+                        <option value="" disabled selected>Year</option>
+                        <option value="1">1st Year</option>
+                        <option value="2">2nd Year</option>
+                        <option value="3">3rd Year</option>
+                        <option value="4">4th Year</option>
+                    </select>
+                </div>
+                <div class="col">
+                    <input type="text" class="form-control" name="section[]" placeholder="Section" required>
+                </div>
+                <div class="col">
+                    <select class="form-select" name="gender[]" required>
+                        <option value="" disabled selected>Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <button type="button" class="btn btn-remove">X</button>
+                </div>
+            `;
+
+            studentList.appendChild(newRow);
+
+            // Attach remove functionality to the new "X" button
+            newRow.querySelector('.btn-remove').addEventListener('click', () => {
+                newRow.remove();
+            });
+        });
+
+        document.addEventListener("DOMContentLoaded", () => {
+        const hamburgerToggle = document.getElementById("hamburgerToggle");
+        if (hamburgerToggle) {
+            hamburgerToggle.addEventListener("change", function () {
+                const sidebar = document.getElementById("sidebar");
+                if (this.checked) {
+                    sidebar.classList.add("open");
+                } else {
+                    sidebar.classList.remove("open");
+                }
+            });
+        }
+
+        const addStudentBtn = document.getElementById('add-student-btn');
+        const studentList = document.getElementById('student-list');
+        const form = document.getElementById('studentForm');
+        const excelUpload = document.getElementById('excelUpload');
+        const successMessage = document.getElementById('success-message');
+
+        addStudentBtn.addEventListener('click', () => {
+            const newRow = document.createElement('div');
+            newRow.classList.add('row', 'mb-3', 'align-items-center');
+            newRow.innerHTML = `<!-- Add dynamic row as in original -->`;
+            studentList.appendChild(newRow);
+
+            newRow.querySelector('.btn-remove').addEventListener('click', () => newRow.remove());
+        });
+
+        form.addEventListener('submit', (e) => {
+            const manualEntries = document.querySelectorAll('input[name="name[]"]').length;
+            const excelFileUploaded = excelUpload.files.length > 0;
+
+            if (!manualEntries && !excelFileUploaded) {
+                alert('Please add at least one student manually or upload an Excel file.');
+                e.preventDefault();
+                return;
+            }
+
+            successMessage.style.display = 'block';
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 3000);
+        });
+
+        excelUpload.addEventListener('change', () => {
+            const file = excelUpload.files[0];
+            if (file) {
+                const allowedExtensions = ['.csv', '.xlsx'];
+                const fileExtension = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
+                if (!allowedExtensions.includes(fileExtension)) {
+                    alert('Please upload a valid Excel file (.csv or .xlsx).');
+                    excelUpload.value = ''; // Clear invalid file
+                }
+            }
+        });
+    });
+
+    </script>
+</body>
+</html>
